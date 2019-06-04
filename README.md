@@ -1,5 +1,5 @@
 ## instagram-scrapper
-Node project to collect Profiles, Posts and Likes, Comments, Follows, Following stats from Instagram profiles without sign-up to their API.
+Node project to collect Profiles, Posts and Likes, Comments, Follows, Following stats from Instagram profiles without sign-up to their API and without user consent.
 
 ## Is there a live example?
 You can go to http://iscrapper.herokuapp.com/ and register profiles, but please delete them later because this database is limited. There is also an API to export the collected data at: http://iscrapper.herokuapp.com/api-docs
