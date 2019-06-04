@@ -38,14 +38,14 @@ Actually, there are two separated apps. The Client which serves the FrontEnd (us
 APPLICATION_INSIGHTS_KEY  # Azure application insights instrumentation key
 MONGODB_URI               # mongodb://<user>:<password>@<server and options>
 MONGODB_DBNAME            # Database name 
-MONGODB_CREATE=true       # This option when is true will create all collections and indexes
-MAX_PROFILES=3            # How many profiles will be scrapped at the same time
+MONGODB_CREATE            # This option when is true will create all collections and indexes
+MAX_PROFILES              # How many profiles will be scrapped at the same time
 MAX_DOWNLOADS=50          # How many posts download will be placed at the same time
-ISCRAPPER_READONLY=false  # This will disable delete and creation of profiles on your instance
-ENVIRONMENT=DEV           # Outputs logs to console when in DEV
+ISCRAPPER_READONLY        # This will disable delete and creation of profiles on your instance
+ENVIRONMENT               # Outputs logs to console when in DEV
 ```
 
-##Client .env configuration fields
+## Client .env configuration fields
 ```
 REACT_APP_BACKEND_URL              # Backend address
 REACT_APP_APPLICATION_INSIGHTS_KEY # Azure application insights instrumentation key
