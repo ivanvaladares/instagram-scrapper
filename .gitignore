@@ -1,0 +1,9 @@
+/backend/node_modules
+/client/node_modules
+/client/.pnp
+/client/.pnp.js
+/client/coverage
+/client/build
+/.vs
+package-lock.json
+.vscode

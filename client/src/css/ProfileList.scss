@@ -1,0 +1,26 @@
+.list-group-item {
+    padding: 10px;
+
+    .progress {
+        margin-bottom: 0px !important;
+    }
+    
+    .profile-name {
+        font-size: 16pt;
+        cursor: pointer;
+        text-overflow: ellipsis;
+        overflow: hidden;
+
+        small {
+            font-size: 10px;
+            color: grey;
+            display: block;
+            margin-top: -5px
+        }
+    }
+    
+    button {
+        margin-left: 5px !important
+    }
+
+}

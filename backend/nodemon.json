@@ -1,0 +1,7 @@
+{
+  "verbose": false,
+  "ignore": [
+    "data/*",
+    "app/public/*"
+  ]
+}

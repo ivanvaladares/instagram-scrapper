@@ -1,0 +1,23 @@
+export interface IProfile {
+    techs: string[],
+    _id: string,
+    fullName: string,
+    username: string,
+    followCount: number,
+    followedByCount: number,
+    postsScrapped: number,
+    likeCount: number,
+    commentCount: number,
+    mediaCount: number,
+    isFixed: boolean,
+    isPrivate: boolean,
+    lastScrapDate: Date,
+    scrapping: boolean,
+    notFound: boolean,
+    scanned: boolean,
+    followPercentage: number,
+    followedByPercentage: number,
+    mediaPercentage: number,
+    likePercentage: number,
+    commentPercentage: number
+}
