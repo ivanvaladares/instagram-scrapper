@@ -40,7 +40,7 @@ MONGODB_URI               # mongodb://<user>:<password>@<server and options>
 MONGODB_DBNAME            # Database name 
 MONGODB_CREATE            # This option when is true will create all collections and indexes
 MAX_PROFILES              # How many profiles will be scrapped at the same time
-MAX_DOWNLOADS=50          # How many posts download will be placed at the same time
+MAX_DOWNLOADS             # How many posts download will be placed at the same time
 ISCRAPPER_READONLY        # This will disable delete and creation of profiles on your instance
 ENVIRONMENT               # Outputs logs to console when in DEV
 ```
