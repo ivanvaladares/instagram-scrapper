@@ -219,6 +219,7 @@ const scrapPostHtml = (post, html) => {
     try {
       let $ = cheerio.load(html);
 
+      let title = $('title').text();
       let image = $('meta[property="og:image"]').attr('content');
       let description = $('meta[property="og:description"]').attr('content');
 
@@ -246,17 +247,23 @@ const scrapPostHtml = (post, html) => {
       let commentCount = parseInt(comments, 10);
       let uploadDate = parseInt(date, 10);
  
-      if (!isNaN(likeCount) && !isNaN(commentCount) && !isNaN(uploadDate)) {
+      if (title.toLowerCase().indexOf("restricted") >= 0 || (!isNaN(likeCount) && !isNaN(commentCount) && !isNaN(uploadDate))) {
 
-        post.image = image;
-        post.likeCount = likeCount;
-        post.commentCount = commentCount;
+        if (title.toLowerCase().indexOf("restricted") >= 0) {
+          post.notFoundCount = post.notFoundCount ? post.notFoundCount + 1 : 1;
+          post.scrapped = true;
+          post.removed = true;
+        } else {
+          post.image = image;
+          post.likeCount = likeCount;
+          post.commentCount = commentCount;
+          post.description = description;
+          post.lastScrapDate = new Date();
+          post.removed = false;
+          post.notFoundCount = 0;
+        }
+
         post.uploadDate = moment(new Date(uploadDate * 1000)).toDate();
-        post.description = description;
-        post.lastScrapDate = new Date();
-        post.scrapped = true;
-        post.removed = false;
-        post.notFoundCount = 0;
 
         return addPostHistoryData(post).then(post => {
 
