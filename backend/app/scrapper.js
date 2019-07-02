@@ -246,23 +246,17 @@ const scrapPostHtml = (post, html) => {
       let likeCount = parseInt(likes, 10);
       let commentCount = parseInt(comments, 10);
       let uploadDate = parseInt(date, 10);
- 
-      if (title.toLowerCase().indexOf("restricted") >= 0 || (!isNaN(likeCount) && !isNaN(commentCount) && !isNaN(uploadDate))) {
 
-        if (title.toLowerCase().indexOf("restricted") >= 0) {
-          post.notFoundCount = post.notFoundCount ? post.notFoundCount + 1 : 1;
-          post.scrapped = true;
-          post.removed = true;
-        } else {
-          post.image = image;
-          post.likeCount = likeCount;
-          post.commentCount = commentCount;
-          post.description = description;
-          post.lastScrapDate = new Date();
-          post.removed = false;
-          post.notFoundCount = 0;
-        }
+      if (!isNaN(likeCount) && !isNaN(commentCount) && !isNaN(uploadDate)) {
 
+        post.image = image;
+        post.likeCount = likeCount;
+        post.commentCount = commentCount;
+        post.description = description;
+        post.lastScrapDate = new Date();
+        post.scrapped = true;
+        post.removed = false;
+        post.notFoundCount = 0;
         post.uploadDate = moment(new Date(uploadDate * 1000)).toDate();
 
         return addPostHistoryData(post).then(post => {
@@ -274,8 +268,23 @@ const scrapPostHtml = (post, html) => {
         });
 
       } else {
-        logger.error("Could not parse post HTML", { path: post.path, html }, true);
-        resolve();
+
+        if (title.toLowerCase().indexOf("restricted") >= 0) {        
+         
+          post.lastScrapDate = new Date();
+          post.notFoundCount = post.notFoundCount ? post.notFoundCount + 1 : 1;
+          post.scrapped = true;
+          post.removed = true;
+
+          return dbPost.replace({ _id: post._id }, post).then(() => {
+            resolve();
+          });
+
+        } else {
+          logger.error("Could not parse post HTML", { path: post.path, html }, true);
+          resolve();
+        }
+
       }
 
     } catch (err) {
@@ -307,19 +316,19 @@ const downloadPostHtml = (post) => {
         logger.error("Error removing post from queue", err);
       });
 
-      if (response.statusCode === 404) {
+      if (response.statusCode === 200) {
+
+        return scrapPostHtml(post, html).then(() => {
+          resolve();
+        });
+
+      } else {
 
         post.notFoundCount = post.notFoundCount ? post.notFoundCount + 1 : 1;
         post.lastScrapDate = new Date();
         post.removed = true;
 
         return dbPost.replace({ path: post.path }, post).then(() => {
-          resolve();
-        });
-
-      } else {
-
-        return scrapPostHtml(post, html).then(() => {
           resolve();
         });
 
