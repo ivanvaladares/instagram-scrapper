@@ -10,6 +10,7 @@ const dbPostQueue = require("./models/post-queue-model.js");
 const dbPostHistory = require("./models/post-history-model.js");
 const logger = require("./logger.js");
 const uuidv1 = require('uuid/v1');
+const sleep = require('util').promisify(setTimeout);
 
 const instanceId = uuidv1();
 const { JSDOM } = jsdom;
@@ -549,10 +550,11 @@ const openProfile = async () => {
     return;
   }
 
-  const pageURL = 'https://www.instagram.com/' + profile.username;
+  const pageURL = 'https://www.instagram.com/' + profile.username + "?t=" + new Date().getTime();
 
   const phantomInstance = await phantom.create();
   const pageInstance = await phantomInstance.createPage();
+  pageInstance.setting('userAgent', "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_5) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.97 Safari/537.11");
   const status = await pageInstance.open(pageURL);
 
   dbProfileQueue.remove({ username: profile.username }).catch(err => {
@@ -583,6 +585,18 @@ const openProfile = async () => {
     return;
   }
 
+  await pageInstance.evaluate(function () {
+    window.scrollTo(100, 0);
+  });
+
+  await sleep(1000);
+
+  await pageInstance.evaluate(function () {
+    window.scrollTo(0, 0);
+  });
+
+  await sleep(1000);
+
   const pageContent = await pageInstance.property('content');
   const pageDOM = new JSDOM(pageContent, { runScripts: "dangerously" });
 
@@ -600,7 +614,13 @@ const openProfile = async () => {
   let followedByCount = extractNumberFromSource(pageContent, /edge_followed_by"[^0-9]+([0-9]+)/);
   let mediaCount = extractNumberFromSource(pageContent, /edge_owner_to_timeline_media"[^0-9]+([0-9]+)/);
 
-  profile.fullName = extractTextFromSource(pageContent, /<title>([^(]+)/);
+  if (followCount === 0 && followedByCount === 0 && mediaCount === 0) {
+    logger.info("Could not capture profile page", { username: profile.username, pageContent });
+    setTimeout(() => phantomInstance.exit(), 1000);
+    return;
+  }
+
+  profile.fullName = pageDOM.window.document.title.match(/([^(]+)/)[1];
   profile.followCount = followCount;
   profile.followedByCount = followedByCount;
   profile.mediaCount = mediaCount;
