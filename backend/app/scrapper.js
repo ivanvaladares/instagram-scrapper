@@ -29,6 +29,22 @@ const calcPercentage = (vOld, vNew) => {
   }
 };
 
+const extractTextFromSource = (html, lookFor) => {
+  let res = html.match(lookFor);
+  if (res && res.length > 0){
+    return res[1];
+  }
+  return "";
+};
+
+const extractNumberFromSource = (html, lookFor) => {
+  let res = html.match(lookFor);
+  if (res && res.length > 0){
+    return parseInt(res[1], 10);
+  }
+  return 0;
+};
+
 const addPostHistoryData = (post) => {
 
   return new Promise(resolve => {
@@ -223,29 +239,14 @@ const scrapPostHtml = (post, html) => {
       let image = $('meta[property="og:image"]').attr('content');
       let description = $('meta[property="og:description"]').attr('content');
 
-      let lookFor = "edge_media_preview_like\":{\"count\":";
-      let pos = html.indexOf(lookFor);
-      let likes = html.substring(pos + lookFor.length);
-      likes = likes.substring(0, likes.indexOf(","));
+      let likeCount = extractNumberFromSource(html, /edge_media_preview_like"[^0-9]+([0-9]+)/);
+      let commentCount = extractNumberFromSource(html, /edge_media_to_comment"[^0-9]+([0-9]+)/);
 
-      if (html.indexOf("edge_media_to_comment") > 0){
-        lookFor = "edge_media_to_comment\":{\"count\":";
-      }else{
-        lookFor = "edge_media_to_parent_comment\":{\"count\":";
+      if (commentCount === 0) {
+        commentCount = extractNumberFromSource(html, /edge_media_to_parent_comment"[^0-9]+([0-9]+)/);
       }
 
-      pos = html.indexOf(lookFor);
-      let comments = html.substring(pos + lookFor.length);
-      comments = comments.substring(0, comments.indexOf(","));
-
-      lookFor = "taken_at_timestamp\":";
-      pos = html.indexOf(lookFor);
-      let date = html.substring(pos + lookFor.length);
-      date = date.substring(0, date.indexOf(","));
-
-      let likeCount = parseInt(likes, 10);
-      let commentCount = parseInt(comments, 10);
-      let uploadDate = parseInt(date, 10);
+      let uploadDate = extractNumberFromSource(html, /taken_at_timestamp"[^0-9]+([0-9]+)/);
 
       if (!isNaN(likeCount) && !isNaN(commentCount) && !isNaN(uploadDate)) {
 
@@ -595,17 +596,15 @@ const openProfile = async () => {
     return;
   }
 
-  let profileDom = pageDOM.window._sharedData.entry_data.ProfilePage[0].graphql.user;
+  let followCount = extractNumberFromSource(pageContent, /edge_follow"[^0-9]+([0-9]+)/);
+  let followedByCount = extractNumberFromSource(pageContent, /edge_followed_by"[^0-9]+([0-9]+)/);
+  let mediaCount = extractNumberFromSource(pageContent, /edge_owner_to_timeline_media"[^0-9]+([0-9]+)/);
 
-  let followCount = profileDom.edge_follow.count;
-  let followedByCount = profileDom.edge_followed_by.count;
-  let mediaCount = profileDom.edge_owner_to_timeline_media.count;
-
-  profile.fullName = profileDom.full_name;
+  profile.fullName = extractTextFromSource(pageContent, /<title>([^(]+)/);
   profile.followCount = followCount;
   profile.followedByCount = followedByCount;
   profile.mediaCount = mediaCount;
-  profile.isPrivate = profileDom.is_private;
+  profile.isPrivate = extractTextFromSource(pageContent, /is_private":([^,]+)/) === "true";
   profile.notFound = false;
 
   if (profile.isPrivate) {
